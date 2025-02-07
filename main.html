@@ -26,9 +26,50 @@
   </div>
 
 <script>
-  const addItems = document.querySelector('.add-items');
-  const itemsList = document.querySelector('.plates');
-  const items = [];
+ // Select elements
+const form = document.querySelector('.add-items');
+const input = document.querySelector('[name=item]');
+const platesList = document.querySelector('.plates');
+let items = JSON.parse(localStorage.getItem('items')) || []; // Load items from localStorage
+
+// Function to add item
+function addItem(e) {
+    e.preventDefault(); // Prevent page refresh
+    const text = input.value.trim(); // Get user input
+    if (text === "") return; // Prevent empty items
+
+    const item = { text, done: false }; // Create item object
+    items.push(item); // Add to array
+    localStorage.setItem('items', JSON.stringify(items)); // Save to localStorage
+    updateList(); // Update UI
+    input.value = ""; // Clear input field
+}
+
+// Function to render items in the list
+function updateList() {
+    platesList.innerHTML = items.map((plate, i) => `
+        <li>
+            <input type="checkbox" data-index="${i}" id="item${i}" ${plate.done ? 'checked' : ''}/>
+            <label for="item${i}">${plate.text}</label>
+        </li>
+    `).join('');
+}
+
+// Function to toggle "done" status
+function toggleDone(e) {
+    if (!e.target.matches('input[type="checkbox"]')) return; // Ignore clicks outside checkboxes
+    const index = e.target.dataset.index;
+    items[index].done = !items[index].done; // Toggle status
+    localStorage.setItem('items', JSON.stringify(items)); // Update localStorage
+    updateList(); // Update UI
+}
+
+// Event Listeners
+form.addEventListener('submit', addItem);
+platesList.addEventListener('click', toggleDone);
+
+// Initial rendering of items from localStorage
+updateList();
 
 </script>
 
